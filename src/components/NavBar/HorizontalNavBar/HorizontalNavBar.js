@@ -22,7 +22,7 @@ const HorizontalNavBar = React.memo(({ className, route, query, title, backButto
         } else {
             navigate(-1);
         }
-    }, []);
+    }, [originPath, navigate]);
     const [fullscreen, requestFullscreen, exitFullscreen] = useFullscreen();
     const [isIOSPWA] = usePWA();
     const renderNavMenuLabel = React.useCallback(({ ref, className, onClick, children, }) => (

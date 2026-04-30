@@ -27,7 +27,7 @@ const Routes = () => {
             navigate('/', { replace: true });
         }
         previousAuthRef.current = profile.auth;
-    }, [location, profile.auth, navigate, previousAuthRef.current]);
+    }, [location.pathname, profile.auth]);
 
     const routes = routerPaths.map((route) =>
         <RRoute key={route.path} path={route.path} element={<Route component={route.element} />} />

@@ -40,8 +40,8 @@ const mapSelectableInputs = (discover, t, navigate) => {
             }
             :
             t.string('SELECT_CATALOG'),
-        onSelect: (event) => {
-            navigate(event.value.replace('#', ''));
+        onSelect: (value) => {
+            navigate(value.replace('#', ''));
         }
     };
     const extraSelects = discover.selectable.extra.map(({ name, isRequired, options }) => {

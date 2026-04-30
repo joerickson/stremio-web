@@ -77,7 +77,8 @@ const SearchBar = React.memo(({ className, query, active }) => {
     const queryInputClear = React.useCallback(() => {
         searchInputRef.current.value = '';
         setCurrentQuery('');
-        navigate('/search', { search: '' });
+        setSearchParams({});
+        navigate('/search');
     }, []);
 
     const updateLocalSearchDebounced = React.useCallback(debounce((query) => {

@@ -65,8 +65,8 @@ const Library = ({ model }) => {
         }
     }, [profile.auth, library.selected]);
     React.useEffect(() => {
-        if (!library.selected?.type && typeSelect.selected) {
-            navigate(typeSelect.selected[0].replace('#', ''));
+        if (!library.selected?.type && typeSelect.value) {
+            navigate(typeSelect.value.replace('#', ''));
         }
     }, [typeSelect.value, library.selected]);
     return (
