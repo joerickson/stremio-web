@@ -8,54 +8,56 @@ function KeyboardShortcuts() {
     const events = new EventEmitter();
 
     function onKeyDown(event) {
-        if (event.keyboardShortcutPrevented || event.target.tagName === 'INPUT' || event.ctrlKey || event.altKey || event.shiftKey || event.metaKey) {
+        if (event.keyboardShortcutPrevented || event.target.tagName === 'INPUT' || event.altKey || event.shiftKey || event.metaKey) {
             return;
         }
 
         switch (event.code) {
             case 'Digit0': {
+                if (event.ctrlKey) break;
                 event.preventDefault();
-                window.location = '#/search';
+                events.emit('navigate', '/search');
                 break;
             }
             case 'Digit1': {
+                if (event.ctrlKey) break;
                 event.preventDefault();
-                window.location = '#/';
+                events.emit('navigate', '/');
                 break;
             }
             case 'Digit2': {
+                if (event.ctrlKey) break;
                 event.preventDefault();
-                window.location = '#/discover';
+                events.emit('navigate', '/discover');
                 break;
             }
             case 'Digit3': {
+                if (event.ctrlKey) break;
                 event.preventDefault();
-                window.location = '#/library';
+                events.emit('navigate', '/library');
                 break;
             }
             case 'Digit4': {
+                if (event.ctrlKey) break;
                 event.preventDefault();
-                window.location = '#/calendar';
+                events.emit('navigate', '/calendar');
                 break;
             }
             case 'Digit5': {
+                if (event.ctrlKey) break;
                 event.preventDefault();
-                window.location = '#/addons';
+                events.emit('navigate', '/addons');
                 break;
             }
             case 'Digit6': {
+                if (event.ctrlKey) break;
                 event.preventDefault();
-                window.location = '#/settings';
+                events.emit('navigate', '/settings');
                 break;
             }
             case 'Backspace': {
                 event.preventDefault();
-                if (event.ctrlKey) {
-                    window.history.forward();
-                } else {
-                    window.history.back();
-                }
-
+                events.emit('navigate', event.ctrlKey ? 1 : -1);
                 break;
             }
         }
@@ -73,6 +75,14 @@ function KeyboardShortcuts() {
             }
         }
     });
+
+    this.on = function(...args) {
+        events.on(...args);
+    };
+
+    this.off = function(...args) {
+        events.off(...args);
+    };
 
     this.start = function() {
         if (active) {

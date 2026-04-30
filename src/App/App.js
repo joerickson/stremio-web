@@ -5,10 +5,8 @@ const React = require('react');
 const { useTranslation } = require('react-i18next');
 const { Router } = require('stremio-router');
 const { Core, Shell, Chromecast, DragAndDrop, KeyboardShortcuts, ServicesProvider, GamepadProvider } = require('stremio/services');
-const { NotFound } = require('stremio/routes');
 const { FileDropProvider, PlatformProvider, ToastProvider, TooltipProvider, ShortcutsProvider, CONSTANTS, withCoreSuspender, useShell, useBinaryState } = require('stremio/common');
 const ServicesToaster = require('./ServicesToaster');
-const DeepLinkHandler = require('./DeepLinkHandler');
 const SearchParamsHandler = require('./SearchParamsHandler');
 const { default: UpdaterBanner } = require('./UpdaterBanner');
 const { default: ShortcutsModal } = require('./ShortcutsModal');
@@ -111,31 +109,6 @@ const App = () => {
         };
     }, []);
 
-    // Handle shell events
-    React.useEffect(() => {
-        const onOpenMedia = (data) => {
-            try {
-                const { protocol, hostname, pathname, searchParams } = new URL(data);
-                if (protocol === CONSTANTS.PROTOCOL) {
-                    if (hostname.length) {
-                        const transportUrl = `https://${hostname}${pathname}`;
-                        window.location.href = `#/addons?addon=${encodeURIComponent(transportUrl)}`;
-                    } else {
-                        window.location.href = `#${pathname}?${searchParams.toString()}`;
-                    }
-                }
-            } catch (e) {
-                console.error('Failed to open media:', e);
-            }
-        };
-
-        shell.on('open-media', onOpenMedia);
-
-        return () => {
-            shell.off('open-media', onOpenMedia);
-        };
-    }, []);
-
     React.useEffect(() => {
         const onCoreEvent = ({ event, args }) => {
             switch (event) {
@@ -233,7 +206,6 @@ const App = () => {
                                                         gamepadModalOpen && <GamepadModal onClose={closeGamepadModal}/>
                                                     }
                                                     <ServicesToaster />
-                                                    <DeepLinkHandler />
                                                     <SearchParamsHandler />
                                                     <UpdaterBanner className={styles['updater-banner-container']} />
                                                     <RouterWithProtectedRoutes
