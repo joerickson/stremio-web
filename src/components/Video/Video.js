@@ -3,6 +3,7 @@
 const React = require('react');
 const { useTranslation } = require('react-i18next');
 const { useNavigate } = require('react-router');
+const { default: toPath } = require('stremio/common/toPath');
 const PropTypes = require('prop-types');
 const classnames = require('classnames');
 const { default: useRouteFocused } = require('stremio/common/useRouteFocused');
@@ -68,10 +69,9 @@ const Video = ({ className, id, title, thumbnail, season, episode, released, upc
     const videoButtonOnClick = React.useCallback(() => {
         if (deepLinks) {
             if (typeof deepLinks.player === 'string') {
-                // TODO: remove # from deeplinks in core
-                navigate(deepLinks.player.replace('#', ''));
+                navigate(toPath(deepLinks.player));
             } else if (typeof deepLinks.metaDetailsStreams === 'string') {
-                navigate(deepLinks.metaDetailsStreams.replace('#', ''), { replace: !platform.isMobile });
+                navigate(toPath(deepLinks.metaDetailsStreams), { replace: !platform.isMobile });
             }
         }
     }, [deepLinks]);

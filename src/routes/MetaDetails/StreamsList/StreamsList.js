@@ -2,6 +2,7 @@
 
 const React = require('react');
 const { useNavigate } = require('react-router');
+const { default: toPath } = require('stremio/common/toPath');
 const PropTypes = require('prop-types');
 const classnames = require('classnames');
 const { useTranslation } = require('react-i18next');
@@ -36,7 +37,7 @@ const StreamsList = ({ className, video, type, onEpisodeSearch, ...props }) => {
                 typeof video.season === 'number'
                     ? `?${new URLSearchParams({ 'season': video.season })}`
                     : ''}`;
-            navigate(navigateTo.replace('#', ''), { replace: true });
+            navigate(toPath(navigateTo), { replace: true });
         } else {
             navigate(-1);
         }

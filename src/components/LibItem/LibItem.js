@@ -2,6 +2,7 @@
 
 const React = require('react');
 const { useNavigate } = require('react-router');
+const { default: toPath } = require('stremio/common/toPath');
 const { useServices } = require('stremio/services');
 const PropTypes = require('prop-types');
 const MetaItem = require('stremio/components/MetaItem');
@@ -51,8 +52,7 @@ const LibItem = ({ _id, removable, notifications, watched, ...props }) => {
             switch (event.value) {
                 case 'play': {
                     if (props.deepLinks && typeof props.deepLinks.player === 'string') {
-                        // TODO: remove # from deeplinks in core for web?
-                        navigate(props.deepLinks.player.replace('#', ''));
+                        navigate(toPath(props.deepLinks.player));
                     }
 
                     break;
@@ -60,9 +60,9 @@ const LibItem = ({ _id, removable, notifications, watched, ...props }) => {
                 case 'details': {
                     if (props.deepLinks) {
                         if (typeof props.deepLinks.metaDetailsVideos === 'string') {
-                            navigate(props.deepLinks.metaDetailsVideos.replace('#', ''));
+                            navigate(toPath(props.deepLinks.metaDetailsVideos));
                         } else if (typeof props.deepLinks.metaDetailsStreams === 'string') {
-                            navigate(props.deepLinks.metaDetailsStreams.replace('#', ''));
+                            navigate(toPath(props.deepLinks.metaDetailsStreams));
                         }
                     }
 
@@ -125,7 +125,7 @@ const LibItem = ({ _id, removable, notifications, watched, ...props }) => {
         if (props.deepLinks && typeof props.deepLinks.player === 'string') {
             return (event) => {
                 event.preventDefault();
-                window.location = props.deepLinks.player;
+                navigate(toPath(props.deepLinks.player));
             };
         }
         return null;

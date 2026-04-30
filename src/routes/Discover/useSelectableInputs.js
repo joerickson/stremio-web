@@ -3,6 +3,7 @@
 const React = require('react');
 const { useNavigate } = require('react-router');
 const { useTranslate } = require('stremio/common');
+const { default: toPath } = require('stremio/common/toPath');
 
 const mapSelectableInputs = (discover, t, navigate) => {
     const selectedType = discover.selectable.types.find(({ selected }) => selected);
@@ -19,7 +20,7 @@ const mapSelectableInputs = (discover, t, navigate) => {
             ? () => t.stringWithPrefix(discover.selected.request.path.type, 'TYPE_')
             : t.string('SELECT_TYPE'),
         onSelect: (value) => {
-            navigate(value.replace('#', ''));
+            navigate(toPath(value));
         }
     };
     const catalogSelect = {
@@ -41,7 +42,7 @@ const mapSelectableInputs = (discover, t, navigate) => {
             :
             t.string('SELECT_CATALOG'),
         onSelect: (value) => {
-            navigate(value.replace('#', ''));
+            navigate(toPath(value));
         }
     };
     const extraSelects = discover.selectable.extra.map(({ name, isRequired, options }) => {
@@ -64,7 +65,7 @@ const mapSelectableInputs = (discover, t, navigate) => {
                 : selectedExtra ? t.string(selectedExtra.value) : () => t.string(name.toUpperCase()),
             onSelect: (value) => {
                 const { href } = JSON.parse(value);
-                navigate(href.replace('#', ''));
+                navigate(toPath(href));
             }
         };
     });

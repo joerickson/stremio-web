@@ -2,6 +2,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router';
+import toPath from 'stremio/common/toPath';
 import Icon from '@stremio/stremio-icons/react';
 import { Button } from 'stremio/components';
 import useCalendarDate from '../useCalendarDate';
@@ -22,11 +23,11 @@ const Selector = ({ selected, selectable, profile }: Props) => {
     ), [selectable]);
 
     const onPrev = useCallback(() => {
-        navigate(prev.deepLinks.calendar.replace('#', ''));
+        navigate(toPath(prev.deepLinks.calendar));
     }, [prev]);
 
     const onNext = useCallback(() => {
-        navigate(next.deepLinks.calendar.replace('#', ''));
+        navigate(toPath(next.deepLinks.calendar));
     }, [next]);
 
     return (

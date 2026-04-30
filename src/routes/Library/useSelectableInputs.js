@@ -3,6 +3,7 @@
 const React = require('react');
 const { useNavigate } = require('react-router');
 const { useTranslate } = require('stremio/common');
+const { default: toPath } = require('stremio/common/toPath');
 
 const mapSelectableInputs = (library, t, navigate) => {
     const selectedType = library.selectable.types.find(({ selected }) => selected) || library.selectable.types.find(({ type }) => type === null);
@@ -14,7 +15,7 @@ const mapSelectableInputs = (library, t, navigate) => {
             })),
         value: selectedType?.deepLinks.library,
         onSelect: (value) => {
-            navigate(value.replace('#', ''));
+            navigate(toPath(value));
         }
     };
     const sortChips = {
@@ -27,7 +28,7 @@ const mapSelectableInputs = (library, t, navigate) => {
             .filter(({ selected }) => selected)
             .map(({ deepLinks }) => deepLinks.library),
         onSelect: (value) => {
-            navigate(value.replace('#', ''));
+            navigate(toPath(value));
         }
     };
     return [typeSelect, sortChips, library.selectable.nextPage];

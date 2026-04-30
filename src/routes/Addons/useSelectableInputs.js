@@ -3,6 +3,7 @@
 const React = require('react');
 const { useNavigate } = require('react-router');
 const { useTranslate } = require('stremio/common');
+const { default: toPath } = require('stremio/common/toPath');
 
 const mapSelectableInputs = (installedAddons, remoteAddons, t, navigate) => {
     const selectedCatalog = remoteAddons.selectable.catalogs.concat(installedAddons.selectable.catalogs).find(({ selected }) => selected);
@@ -24,7 +25,7 @@ const mapSelectableInputs = (installedAddons, remoteAddons, t, navigate) => {
             :
             null,
         onSelect: (value) => {
-            navigate(value.replace('#', ''));
+            navigate(toPath(value));
         }
     };
     const selectedType = installedAddons.selected !== null
@@ -55,7 +56,7 @@ const mapSelectableInputs = (installedAddons, remoteAddons, t, navigate) => {
                     t.string('SELECT_TYPE');
         },
         onSelect: (value) => {
-            navigate(value.replace('#', ''));
+            navigate(toPath(value));
         }
     };
     return [catalogSelect, typeSelect];
