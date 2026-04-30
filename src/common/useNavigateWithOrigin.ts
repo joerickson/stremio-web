@@ -24,6 +24,10 @@ export function useNavigateWithOrigin() {
     }
 
     function getStoredOrigin(fallback = '/'): string {
+        if (location.state?.from) {
+            const from = location.state.from as Location;
+            return from.pathname + (from.search || '');
+        }
         return sessionStorage.getItem(ORIGIN_KEY) || fallback;
     }
 

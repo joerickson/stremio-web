@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useNavigate } from 'react-router';
 import magnet from 'magnet-uri';
 import { useServices } from 'stremio/services';
 import useToast from 'stremio/common/Toast/useToast';
@@ -8,6 +9,7 @@ import useStreamingServer from 'stremio/common/useStreamingServer';
 const HTTP_REGEX = /^https?:\/\/.+/i;
 
 const usePlayUrl = () => {
+    const navigate = useNavigate();
     const { core } = useServices();
     const toast = useToast();
     const { createTorrentFromMagnet } = useTorrent();
@@ -26,7 +28,7 @@ const usePlayUrl = () => {
             try {
                 const encoded = await core.transport.encodeStream({ url: trimmed });
                 if (typeof encoded === 'string') {
-                    window.location.hash = `#/player/${encodeURIComponent(encoded)}`;
+                    navigate(`/player/${encodeURIComponent(encoded)}`);
                     return true;
                 }
             } catch (e) {

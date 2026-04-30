@@ -11,6 +11,7 @@ const { default: useRouteFocused } = require('stremio/common/useRouteFocused');
 const { useServices, useGamepad } = require('stremio/services');
 const { useContentGamepadNavigation } = require('stremio/services/GamepadNavigation');
 const { onFileDrop, useSettings, useProfile, useFullscreen, useBinaryState, useToast, useStreamingServer, withCoreSuspender, CONSTANTS, useShell, usePlatform, onShortcut } = require('stremio/common');
+const { default: toPath } = require('stremio/common/toPath');
 const { HorizontalNavBar, Transition, ContextMenu } = require('stremio/components');
 const BufferingLoader = require('./BufferingLoader');
 const VolumeChangeIndicator = require('./VolumeChangeIndicator');
@@ -138,22 +139,22 @@ const Player = () => {
             if (bingeWatching) {
                 if (deepLinks.player) {
                     isNavigating.current = true;
-                    navigate(deepLinks.player.replace('#', ''), { replace: true });
+                    navigate(toPath(deepLinks.player), { replace: true });
                 } else if (deepLinks.metaDetailsStreams) {
                     isNavigating.current = true;
-                    navigate(deepLinks.metaDetailsStreams.replace('#', ''), { replace: true });
+                    navigate(toPath(deepLinks.metaDetailsStreams), { replace: true });
                 }
             } else {
-                window.history.back();
+                navigate(-1);
             }
 
         } else {
             if (deepLinks.player) {
                 isNavigating.current = true;
-                navigate(deepLinks.player.replace('#', ''), { replace: true });
+                navigate(toPath(deepLinks.player), { replace: true });
             } else if (deepLinks.metaDetailsStreams) {
                 isNavigating.current = true;
-                navigate(deepLinks.metaDetailsStreams.replace('#', ''), { replace: true });
+                navigate(toPath(deepLinks.metaDetailsStreams), { replace: true });
             }
         }
     }, []);
@@ -850,7 +851,7 @@ const Player = () => {
 
     onShortcut('exit', () => {
         closeMenus();
-        !settings.escExitFullscreen && window.history.back();
+        !settings.escExitFullscreen && navigate(-1);
     }, [settings.escExitFullscreen]);
 
     React.useLayoutEffect(() => {
