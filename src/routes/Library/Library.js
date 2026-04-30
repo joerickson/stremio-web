@@ -17,7 +17,7 @@ const styles = require('./styles');
 
 const SCROLL_TO_BOTTOM_TRESHOLD = 400;
 
-function withModel(Library, useLocation) {
+function withModel(Library) {
     const withModel = () => {
         const location = useLocation();
         const model = React.useMemo(() => {
@@ -128,4 +128,4 @@ const LibraryFallback = ({ model }) => (
 
 LibraryFallback.propTypes = Library.propTypes;
 
-module.exports = withModel(withCoreSuspender(Library, LibraryFallback), useLocation);
+module.exports = withModel(withCoreSuspender(Library, LibraryFallback));
