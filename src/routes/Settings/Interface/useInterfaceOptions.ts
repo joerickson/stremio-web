@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { interfaceLanguages, useLanguageSorting } from 'stremio/common';
 import { useServices } from 'stremio/services';
 
-const useGeneralOptions = (profile: Profile) => {
+const useInterfaceOptions = (profile: Profile) => {
     const { core } = useServices();
 
     const interfaceLanguageOptions = useMemo(() =>
@@ -81,12 +81,29 @@ const useGeneralOptions = (profile: Profile) => {
         }
     }), [profile.settings]);
 
+    const gamepadSupportToggle = useMemo(() => ({
+        checked: profile.settings.gamepadSupport,
+        onClick: () => {
+            core.transport.dispatch({
+                action: 'Ctx',
+                args: {
+                    action: 'UpdateSettings',
+                    args: {
+                        ...profile.settings,
+                        gamepadSupport: !profile.settings.gamepadSupport
+                    }
+                }
+            });
+        }
+    }), [profile.settings]);
+
     return {
         interfaceLanguageSelect,
         escExitFullscreenToggle,
         quitOnCloseToggle,
         hideSpoilersToggle,
+        gamepadSupportToggle,
     };
 };
 
-export default useGeneralOptions;
+export default useInterfaceOptions;

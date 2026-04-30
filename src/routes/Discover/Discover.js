@@ -31,6 +31,11 @@ const Discover = () => {
     const [addonModalOpen, openAddonModal, closeAddonModal] = useBinaryState(false);
     const [selectedMetaItemIndex, setSelectedMetaItemIndex] = React.useState(0);
 
+    const selectedMetaItem = React.useMemo(() => {
+        return discover.catalog?.content.type === 'Ready' &&
+            discover.catalog.content.content[selectedMetaItemIndex] || null;
+    }, [discover.catalog, selectedMetaItemIndex]);
+
     const metasContainerRef = React.useRef();
     const metaPreviewRef = React.useRef();
 
@@ -48,14 +53,6 @@ const Discover = () => {
             }
         }
     }, [hasNextPage, loadNextPage]);
-    const selectedMetaItem = React.useMemo(() => {
-        return discover.catalog !== null &&
-            discover.catalog.content.type === 'Ready' &&
-            discover.catalog.content.content[selectedMetaItemIndex] ?
-            discover.catalog.content.content[selectedMetaItemIndex]
-            :
-            null;
-    }, [discover.catalog, selectedMetaItemIndex]);
     const addToLibrary = React.useCallback(() => {
         if (selectedMetaItem === null) {
             return;
@@ -79,6 +76,22 @@ const Discover = () => {
             args: {
                 action: 'RemoveFromLibrary',
                 args: selectedMetaItem.id
+            }
+        });
+    }, [selectedMetaItem]);
+    const toggleWatched = React.useCallback(() => {
+        if (selectedMetaItem === null) {
+            return;
+        }
+
+        core.transport.dispatch({
+            action: 'Ctx',
+            args: {
+                action: 'MetaItemMarkAsWatched',
+                args: {
+                    meta_item: selectedMetaItem,
+                    is_watched: !selectedMetaItem.watched,
+                }
             }
         });
     }, [selectedMetaItem]);
@@ -141,14 +154,14 @@ const Discover = () => {
                         discover.catalog === null ?
                             <DelayedRenderer delay={500}>
                                 <div className={styles['message-container']}>
-                                    <Image className={styles['image']} src={require('/images/empty.png')} alt={' '} />
+                                    <Image className={styles['image']} src={require('/assets/images/empty.png')} alt={' '} />
                                     <div className={styles['message-label']}>{t('NO_CATALOG_SELECTED')}</div>
                                 </div>
                             </DelayedRenderer>
                             :
                             discover.catalog.content.type === 'Err' ?
                                 <div className={styles['message-container']}>
-                                    <Image className={styles['image']} src={require('/images/empty.png')} alt={' '} />
+                                    <Image className={styles['image']} src={require('/assets/images/empty.png')} alt={' '} />
                                     <div className={styles['message-label']}>{discover.catalog.content.content}</div>
                                 </div>
                                 :
@@ -201,6 +214,8 @@ const Discover = () => {
                             trailerStreams={selectedMetaItem.trailerStreams}
                             inLibrary={selectedMetaItem.inLibrary}
                             toggleInLibrary={selectedMetaItem.inLibrary ? removeFromLibrary : addToLibrary}
+                            watched={selectedMetaItem.watched}
+                            toggleWatched={toggleWatched}
                             metaId={selectedMetaItem.id}
                             like={selectedMetaItem.like}
                         />

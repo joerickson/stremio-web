@@ -1,10 +1,11 @@
 // Copyright (C) 2017-2023 Smart code 203358507
 
 const React = require('react');
-const { useSearchParams } = require('react-router-dom');
+const { useNavigate, useSearchParams } = require('react-router-dom');
 
 const useSeason = (urlParams) => {
-    const [queryParams, setQueryParams] = useSearchParams();
+    const navigate = useNavigate();
+    const [queryParams] = useSearchParams();
     const season = React.useMemo(() => {
         return queryParams.has('season') && !isNaN(queryParams.get('season')) ?
             parseInt(queryParams.get('season'), 10)
@@ -14,8 +15,11 @@ const useSeason = (urlParams) => {
     const setSeason = React.useCallback((season) => {
         const nextQueryParams = new URLSearchParams(queryParams);
         nextQueryParams.set('season', season);
-        setQueryParams(nextQueryParams, { replace: true });
-    }, [urlParams, queryParams]);
+        const path = urlParams.path.endsWith('/') ?
+            urlParams.path.slice(0, -1) :
+            urlParams.path;
+        navigate(`${path}?${nextQueryParams}`, { replace: true });
+    }, [urlParams, queryParams, navigate]);
     return [season, setSeason];
 };
 

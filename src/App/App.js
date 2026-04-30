@@ -4,12 +4,15 @@ require('spatial-navigation-polyfill');
 const React = require('react');
 const { useTranslation } = require('react-i18next');
 const { Router } = require('stremio-router');
-const { Core, Shell, Chromecast, DragAndDrop, KeyboardShortcuts, ServicesProvider } = require('stremio/services');
-const { FileDropProvider, PlatformProvider, ToastProvider, TooltipProvider, CONSTANTS, withCoreSuspender, useShell } = require('stremio/common');
+const { Core, Shell, Chromecast, DragAndDrop, KeyboardShortcuts, ServicesProvider, GamepadProvider } = require('stremio/services');
+const { NotFound } = require('stremio/routes');
+const { FileDropProvider, PlatformProvider, ToastProvider, TooltipProvider, ShortcutsProvider, CONSTANTS, withCoreSuspender, useShell, useBinaryState } = require('stremio/common');
 const ServicesToaster = require('./ServicesToaster');
 const DeepLinkHandler = require('./DeepLinkHandler');
 const SearchParamsHandler = require('./SearchParamsHandler');
 const { default: UpdaterBanner } = require('./UpdaterBanner');
+const { default: ShortcutsModal } = require('./ShortcutsModal');
+const { default: GamepadModal } = require('./GamepadModal');
 const ErrorDialog = require('./ErrorDialog');
 const styles = require('./styles');
 
@@ -18,6 +21,7 @@ const RouterWithProtectedRoutes = withCoreSuspender(Router);
 const App = () => {
     const { i18n } = useTranslation();
     const shell = useShell();
+    const [gamepadSupportEnabled, setGamepadSupportEnabled] = React.useState(false);
     const services = React.useMemo(() => {
         const core = new Core({
             appVersion: process.env.VERSION,
@@ -32,6 +36,20 @@ const App = () => {
         };
     }, []);
     const [initialized, setInitialized] = React.useState(false);
+    const [shortcutModalOpen,, closeShortcutsModal, toggleShortcutModal] = useBinaryState(false);
+    const [gamepadModalOpen,, closeGamepadModal, toggleGamepadModal] = useBinaryState(false);
+
+    const onShortcut = React.useCallback((name) => {
+        switch (name) {
+            case 'shortcuts':
+                toggleShortcutModal();
+                break;
+            case 'gamepadGuide':
+                toggleGamepadModal();
+                break;
+        }
+    }, [toggleShortcutModal, toggleGamepadModal]);
+
     React.useEffect(() => {
         let prevPath = window.location.hash.slice(1);
         const onLocationHashChange = () => {
@@ -126,6 +144,10 @@ const App = () => {
                         i18n.changeLanguage(args.settings.interfaceLanguage);
                     }
 
+                    if (args?.settings?.gamepadSupport !== undefined) {
+                        setGamepadSupportEnabled(args.settings.gamepadSupport);
+                    }
+
                     if (args?.settings?.quitOnClose && shell.windowClosed) {
                         shell.send('quit');
                     }
@@ -137,6 +159,10 @@ const App = () => {
         const onCtxState = (state) => {
             if (state && state.profile && state.profile.settings && typeof state.profile.settings.interfaceLanguage === 'string') {
                 i18n.changeLanguage(state.profile.settings.interfaceLanguage);
+            }
+
+            if (typeof state.profile.settings.gamepadSupport === 'boolean') {
+                setGamepadSupportEnabled(state.profile.settings.gamepadSupport);
             }
 
             if (state?.profile?.settings?.quitOnClose && shell.windowClosed) {
@@ -153,7 +179,8 @@ const App = () => {
             services.core.transport.dispatch({
                 action: 'Ctx',
                 args: {
-                    action: 'PullUserFromAPI'
+                    action: 'PullUserFromAPI',
+                    args: {}
                 }
             });
             services.core.transport.dispatch({
@@ -197,11 +224,23 @@ const App = () => {
                                 <ToastProvider className={styles['toasts-container']}>
                                     <TooltipProvider className={styles['tooltip-container']}>
                                         <FileDropProvider className={styles['file-drop-container']}>
-                                            <ServicesToaster />
-                                            <DeepLinkHandler />
-                                            <SearchParamsHandler />
-                                            <UpdaterBanner className={styles['updater-banner-container']} />
-                                            <RouterWithProtectedRoutes className={styles['router']} />
+                                            <GamepadProvider enabled={gamepadSupportEnabled} onGuide={toggleGamepadModal}>
+                                                <ShortcutsProvider onShortcut={onShortcut}>
+                                                    {
+                                                        shortcutModalOpen && <ShortcutsModal onClose={closeShortcutsModal}/>
+                                                    }
+                                                    {
+                                                        gamepadModalOpen && <GamepadModal onClose={closeGamepadModal}/>
+                                                    }
+                                                    <ServicesToaster />
+                                                    <DeepLinkHandler />
+                                                    <SearchParamsHandler />
+                                                    <UpdaterBanner className={styles['updater-banner-container']} />
+                                                    <RouterWithProtectedRoutes
+                                                        className={styles['router']}
+                                                    />
+                                                </ShortcutsProvider>
+                                            </GamepadProvider>
                                         </FileDropProvider>
                                     </TooltipProvider>
                                 </ToastProvider>

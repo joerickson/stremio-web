@@ -3,9 +3,8 @@ type LibraryItemPlayer = Pick<LibraryItem, '_id'> & {
 };
 
 type VideoPlayer = Video & {
-    upcomming: boolean,
+    upcoming: boolean,
     watched: boolean,
-    progress: boolean | null,
     scheduled: boolean,
     deepLinks: VideoDeepLinks,
 };
@@ -30,6 +29,23 @@ type SeriesInfo = {
     season: number,
 };
 
+type SubtitlesTrackState = {
+    id: string,
+    embedded: boolean,
+};
+
+type AudioTrackState = {
+    id: string,
+};
+
+type StreamState = {
+    subtitleTrack?: SubtitlesTrackState,
+    subtitleDelay?: number,
+    subtitleSize?: number,
+    subtitleOffset?: number,
+    audioTrack?: AudioTrackState,
+};
+
 type Player = {
     addon: Addon | null,
     libraryItem: LibraryItemPlayer | null,
@@ -42,6 +58,7 @@ type Player = {
         subtitlesPath: ResourceRequestPath,
     } | null,
     seriesInfo: SeriesInfo | null,
+    streamState: StreamState | null,
     subtitles: Subtitle[],
     title: string | null,
 };

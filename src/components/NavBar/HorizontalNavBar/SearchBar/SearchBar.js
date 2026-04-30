@@ -11,7 +11,7 @@ const { default: Icon } = require('@stremio/stremio-icons/react');
 const { default: useRouteFocused } = require('stremio/common/useRouteFocused');
 const Button = require('stremio/components/Button').default;
 const TextInput = require('stremio/components/TextInput').default;
-const useTorrent = require('stremio/common/useTorrent');
+const { default: usePlayUrl } = require('stremio/common/usePlayUrl');
 const { withCoreSuspender } = require('stremio/common/CoreSuspender');
 const useSearchHistory = require('./useSearchHistory');
 const useLocalSearch = require('./useLocalSearch');
@@ -23,8 +23,8 @@ const SearchBar = React.memo(({ className, query, active }) => {
     const routeFocused = useRouteFocused();
     const searchHistory = useSearchHistory();
     const localSearch = useLocalSearch();
-    const { createTorrentFromMagnet } = useTorrent();
     const navigate = useNavigate();
+    const { handlePlayUrl } = usePlayUrl();
 
     const [historyOpen, openHistory, closeHistory, ] = useBinaryState(query === null ? true : false);
     const [currentQuery, setCurrentQuery] = React.useState(query || '');
@@ -55,12 +55,14 @@ const SearchBar = React.memo(({ className, query, active }) => {
         const value = searchInputRef.current.value;
         setCurrentQuery(value);
         openHistory();
-        try {
-            createTorrentFromMagnet(value);
-        } catch (error) {
-            console.error('Failed to create torrent from magnet:', error);
+    }, []);
+
+    const queryInputOnPaste = React.useCallback((event) => {
+        const pasted = event.clipboardData.getData('text');
+        if (pasted) {
+            handlePlayUrl(pasted);
         }
-    }, [createTorrentFromMagnet]);
+    }, [handlePlayUrl]);
 
     const queryInputOnSubmit = React.useCallback((event) => {
         event.preventDefault();
@@ -111,6 +113,7 @@ const SearchBar = React.memo(({ className, query, active }) => {
                         defaultValue={query}
                         tabIndex={-1}
                         onChange={queryInputOnChange}
+                        onPaste={queryInputOnPaste}
                         onSubmit={queryInputOnSubmit}
                         onClick={openHistory}
                     />

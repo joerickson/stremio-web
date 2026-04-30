@@ -22,6 +22,7 @@ const useVideo = () => {
         muted: null,
         playbackSpeed: null,
         videoParams: null,
+        hdrInfo: null,
         audioTracks: [],
         selectedAudioTrackId: null,
         subtitlesTracks: [],
@@ -94,6 +95,30 @@ const useVideo = () => {
         dispatch({ type: 'setProp', propName: name, propValue: value });
     };
 
+    const setPaused = (state) => {
+        setProp('paused', state);
+    };
+
+    const setVolume = (volume) => {
+        setProp('volume', volume);
+    };
+
+    const setMuted = (state) => {
+        setProp('muted', state);
+    };
+
+    const setTime = (time) => {
+        setProp('time', time);
+    };
+
+    const setPlaybackSpeed = (rate) => {
+        setProp('playbackSpeed', rate);
+    };
+
+    const setAudioTrack = (id) => {
+        setProp('selectedAudioTrackId', id);
+    };
+
     const setSubtitlesTrack = (id) => {
         setProp('selectedSubtitlesTrackId', id);
         setProp('selectedExtraSubtitlesTrackId', null);
@@ -102,6 +127,39 @@ const useVideo = () => {
     const setExtraSubtitlesTrack = (id) => {
         setProp('selectedSubtitlesTrackId', null);
         setProp('selectedExtraSubtitlesTrackId', id);
+    };
+
+    const setSubtitlesDelay = (delay) => {
+        setProp('extraSubtitlesDelay', delay);
+    };
+
+    const setSubtitlesSize = (size) => {
+        setProp('subtitlesSize', size);
+        setProp('extraSubtitlesSize', size);
+    };
+
+    const setSubtitlesOffset = (offset) => {
+        setProp('subtitlesOffset', offset);
+        setProp('extraSubtitlesOffset', offset);
+    };
+
+    const setVideoScale = (scale) => {
+        setProp('videoScale', scale);
+    };
+
+    const setSubtitlesTextColor = (color) => {
+        setProp('subtitlesTextColor', color);
+        setProp('extraSubtitlesTextColor', color);
+    };
+
+    const setSubtitlesBackgroundColor = (color) => {
+        setProp('subtitlesBackgroundColor', color);
+        setProp('extraSubtitlesBackgroundColor', color);
+    };
+
+    const setSubtitlesOutlineColor = (color) => {
+        setProp('subtitlesOutlineColor', color);
+        setProp('extraSubtitlesOutlineColor', color);
     };
 
     const onError = (error) => {
@@ -152,7 +210,15 @@ const useVideo = () => {
         video.current.on('extraSubtitlesTrackLoaded', onExtraSubtitlesTrackLoaded);
         video.current.on('extraSubtitlesTrackAdded', onExtraSubtitlesTrackAdded);
 
-        return () => video.current.destroy();
+        return () => {
+            if (video.current) {
+                try {
+                    video.current.destroy();
+                } catch (err) {
+                    console.error('Error destroying video:', err);
+                }
+            }
+        };
     }, []);
 
     return {
@@ -163,9 +229,21 @@ const useVideo = () => {
         unload,
         addExtraSubtitlesTracks,
         addLocalSubtitles,
-        setProp,
+        setPaused,
+        setVolume,
+        setMuted,
+        setTime,
+        setPlaybackSpeed,
+        setAudioTrack,
         setSubtitlesTrack,
+        setSubtitlesDelay,
+        setSubtitlesSize,
+        setSubtitlesOffset,
+        setSubtitlesTextColor,
+        setSubtitlesBackgroundColor,
+        setSubtitlesOutlineColor,
         setExtraSubtitlesTrack,
+        setVideoScale,
     };
 };
 

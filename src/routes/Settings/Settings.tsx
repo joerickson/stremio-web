@@ -3,11 +3,12 @@
 import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import classnames from 'classnames';
 import throttle from 'lodash.throttle';
-import { useProfile, useStreamingServer, useRouteFocused, withCoreSuspender } from 'stremio/common';
+import { usePlatform, useProfile, useStreamingServer, useRouteFocused, withCoreSuspender } from 'stremio/common';
 import { MainNavBars } from 'stremio/components';
 import { SECTIONS } from './constants';
 import Menu from './Menu';
 import General from './General';
+import Interface from './Interface';
 import Player from './Player';
 import Streaming from './Streaming';
 import Shortcuts from './Shortcuts';
@@ -17,16 +18,19 @@ import styles from './Settings.less';
 const Settings = () => {
     const routeFocused = useRouteFocused();
     const profile = useProfile();
+    const platform = usePlatform();
     const streamingServer = useStreamingServer();
 
     const sectionsContainerRef = useRef<HTMLDivElement>(null);
     const generalSectionRef = useRef<HTMLDivElement>(null);
+    const interfaceSectionRef = useRef<HTMLDivElement>(null);
     const playerSectionRef = useRef<HTMLDivElement>(null);
     const streamingServerSectionRef = useRef<HTMLDivElement>(null);
     const shortcutsSectionRef = useRef<HTMLDivElement>(null);
 
     const sections = useMemo(() => ([
         { ref: generalSectionRef, id: SECTIONS.GENERAL },
+        { ref: interfaceSectionRef, id: SECTIONS.INTERFACE },
         { ref: playerSectionRef, id: SECTIONS.PLAYER },
         { ref: streamingServerSectionRef, id: SECTIONS.STREAMING },
         { ref: shortcutsSectionRef, id: SECTIONS.SHORTCUTS },
@@ -36,17 +40,27 @@ const Settings = () => {
 
     const updateSelectedSectionId = useCallback(() => {
         const container = sectionsContainerRef.current;
-        if (container!.scrollTop + container!.clientHeight >= container!.scrollHeight - 50) {
-            setSelectedSectionId(sections[sections.length - 1].id);
-        } else {
-            for (let i = sections.length - 1; i >= 0; i--) {
-                if (sections[i].ref.current!.offsetTop - container!.offsetTop <= container!.scrollTop) {
-                    setSelectedSectionId(sections[i].id);
-                    break;
-                }
-            }
+        if (!container) return;
+
+        const availableSections = sections.filter((section) => section.ref.current);
+        if (!availableSections.length) return;
+
+        const { scrollTop, clientHeight, scrollHeight, offsetTop } = container;
+        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10;
+
+        if (isAtBottom) {
+            setSelectedSectionId(availableSections[availableSections.length - 1].id);
+            return;
         }
-    }, []);
+
+        const marker = scrollTop + 50;
+        const activeSection = availableSections.reduce((current, section) => {
+            const sectionTop = section.ref.current!.offsetTop + offsetTop;
+            return sectionTop <= marker ? section : current;
+        }, availableSections[0]);
+
+        setSelectedSectionId(activeSection.id);
+    }, [sections]);
 
     const onMenuSelect = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
         const section = sections.find((section) => {
@@ -54,11 +68,11 @@ const Settings = () => {
         });
 
         const container = sectionsContainerRef.current;
-        section && container!.scrollTo({
+        section && container?.scrollTo({
             top: section.ref.current!.offsetTop - container!.offsetTop,
             behavior: 'smooth'
         });
-    }, []);
+    }, [sections]);
 
     const onContainerScroll = useCallback(throttle(() => {
         updateSelectedSectionId();
@@ -84,6 +98,10 @@ const Settings = () => {
                         ref={generalSectionRef}
                         profile={profile}
                     />
+                    <Interface
+                        ref={interfaceSectionRef}
+                        profile={profile}
+                    />
                     <Player
                         ref={playerSectionRef}
                         profile={profile}
@@ -93,7 +111,9 @@ const Settings = () => {
                         profile={profile}
                         streamingServer={streamingServer}
                     />
-                    <Shortcuts ref={shortcutsSectionRef} />
+                    {
+                        !platform.isMobile && <Shortcuts ref={shortcutsSectionRef} />
+                    }
                     <Info streamingServer={streamingServer} />
                 </div>
             </div>

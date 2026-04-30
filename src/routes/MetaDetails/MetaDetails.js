@@ -5,6 +5,7 @@ const { useParams, useLocation, useNavigate } = require('react-router');
 const { useTranslation } = require('react-i18next');
 const classnames = require('classnames');
 const { useServices } = require('stremio/services');
+const { useContentGamepadNavigation } = require('stremio/services/GamepadNavigation');
 const { withCoreSuspender } = require('stremio/common');
 const { useNavigateWithOrigin } = require('stremio/common/useNavigateWithOrigin');
 const { VerticalNavBar, HorizontalNavBar, DelayedRenderer, Image, MetaPreview, ModalDialog } = require('stremio/components');
@@ -20,6 +21,7 @@ const MetaDetails = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { getStoredOrigin } = useNavigateWithOrigin();
+    const contentRef = React.useRef(null);
     const { t } = useTranslation();
     const { core } = useServices();
     const urlParams = React.useMemo(() => ({
@@ -74,6 +76,19 @@ const MetaDetails = () => {
             }
         });
     }, [metaDetails]);
+    const toggleWatched = React.useCallback(() => {
+        if (metaDetails.metaItem === null || metaDetails.metaItem.content.type !== 'Ready') {
+            return;
+        }
+
+        core.transport.dispatch({
+            action: 'MetaDetails',
+            args: {
+                action: 'MarkAsWatched',
+                args: !metaDetails.metaItem.content.content.watched
+            }
+        });
+    }, [metaDetails]);
     const toggleNotifications = React.useCallback(() => {
         if (metaDetails.libraryItem) {
             core.transport.dispatch({
@@ -91,7 +106,9 @@ const MetaDetails = () => {
     const handleEpisodeSearch = React.useCallback((season, episode) => {
         const searchVideoHash = encodeURIComponent(`${urlParams.id}:${season}:${episode}`);
         const url = location.pathname;
-        const searchVideoPath = url.replace(encodeURIComponent(urlParams.videoId), searchVideoHash);
+        const searchVideoPath = (urlParams.videoId === undefined || urlParams.videoId === null || urlParams.videoId === '') ?
+            url + (!url.endsWith('/') ? '/' : '') + searchVideoHash
+            : url.replace(encodeURIComponent(urlParams.videoId), searchVideoHash);
         navigate(searchVideoPath, { replace: true });
     }, [urlParams, location]);
 
@@ -104,6 +121,8 @@ const MetaDetails = () => {
         metaDetails.metaItem.content.content.background.length > 0
     ), [metaPath, metaDetails]);
     const originPath = React.useMemo(() => getStoredOrigin(), [getStoredOrigin]);
+
+    useContentGamepadNavigation(contentRef, urlParams.path);
     return (
         <div className={styles['metadetails-container']}>
             {
@@ -126,7 +145,7 @@ const MetaDetails = () => {
                 navMenu={true}
                 originPath={originPath}
             />
-            <div className={styles['metadetails-content']}>
+            <div ref={contentRef} className={styles['metadetails-content']}>
                 {
                     tabs.length > 0 ?
                         <VerticalNavBar
@@ -141,20 +160,20 @@ const MetaDetails = () => {
                     metaPath === null ?
                         <DelayedRenderer delay={500}>
                             <div className={styles['meta-message-container']}>
-                                <Image className={styles['image']} src={require('/images/empty.png')} alt={' '} />
+                                <Image className={styles['image']} src={require('/assets/images/empty.png')} alt={' '} />
                                 <div className={styles['message-label']}>{t('ERR_NO_META_SELECTED')}</div>
                             </div>
                         </DelayedRenderer>
                         :
                         metaDetails.metaItem === null ?
                             <div className={styles['meta-message-container']}>
-                                <Image className={styles['image']} src={require('/images/empty.png')} alt={' '} />
+                                <Image className={styles['image']} src={require('/assets/images/empty.png')} alt={' '} />
                                 <div className={styles['message-label']}>{t('ERR_NO_ADDONS_FOR_META')}</div>
                             </div>
                             :
                             metaDetails.metaItem.content.type === 'Err' ?
                                 <div className={styles['meta-message-container']}>
-                                    <Image className={styles['image']} src={require('/images/empty.png')} alt={' '} />
+                                    <Image className={styles['image']} src={require('/assets/images/empty.png')} alt={' '} />
                                     <div className={styles['message-label']}>{t('ERR_NO_META_FOUND')}</div>
                                 </div>
                                 :
@@ -179,6 +198,8 @@ const MetaDetails = () => {
                                             trailerStreams={metaDetails.metaItem.content.content.trailerStreams}
                                             inLibrary={metaDetails.metaItem.content.content.inLibrary}
                                             toggleInLibrary={metaDetails.metaItem.content.content.inLibrary ? removeFromLibrary : addToLibrary}
+                                            watched={metaDetails.metaItem.content.content.watched}
+                                            toggleWatched={toggleWatched}
                                             metaId={metaDetails.metaItem.content.content.id}
                                             ratingInfo={metaDetails.ratingInfo}
                                         />
@@ -201,6 +222,7 @@ const MetaDetails = () => {
                                 metaItem={metaDetails.metaItem}
                                 libraryItem={metaDetails.libraryItem}
                                 season={season}
+                                selectedVideoId={metaDetails.libraryItem?.state?.video_id}
                                 seasonOnSelect={seasonOnSelect}
                                 toggleNotifications={toggleNotifications}
                             />

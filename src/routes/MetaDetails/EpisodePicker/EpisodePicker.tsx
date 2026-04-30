@@ -18,6 +18,9 @@ const EpisodePicker = ({ className, onSubmit }: Props) => {
 
     const { initialSeason, initialEpisode } = useMemo(() => {
         const splitPath = location.pathname.split('/');
+        if (splitPath[splitPath.length - 1] === '') {
+            splitPath.pop();
+        }
         const videoId = decodeURIComponent(splitPath[splitPath.length - 1]);
         const [, pathSeason, pathEpisode] = videoId ? videoId.split(':') : [];
         return {

@@ -55,13 +55,13 @@ const mapSelectableInputs = (discover, t, navigate) => {
                     value
                 })
             })),
-            value: JSON.stringify({
+            value: selectedExtra ? JSON.stringify({
                 href: selectedExtra.deepLinks.discover,
                 value: selectedExtra.value,
-            }),
+            }) : undefined,
             title: options.some(({ selected, value }) => selected && value === null) ?
                 () => t.string(name.toUpperCase())
-                : t.string(selectedExtra.value),
+                : selectedExtra ? t.string(selectedExtra.value) : () => t.string(name.toUpperCase()),
             onSelect: (value) => {
                 const { href } = JSON.parse(value);
                 navigate(href.replace('#', ''));

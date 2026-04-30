@@ -2,7 +2,7 @@
 
 const React = require('react');
 const throttle = require('lodash.throttle');
-const isEqual = require('lodash.isequal');
+const { deepEqual } = require('fast-equals');
 const intersection = require('lodash.intersection');
 const { useCoreSuspender } = require('stremio/common/CoreSuspender');
 const { default: useRouteFocused } = require('stremio/common/useRouteFocused');
@@ -19,7 +19,7 @@ const useModelState = ({ action, ...args }) => {
     const [state, setState] = React.useReducer(
         (prevState, nextState) => {
             return Object.keys(prevState).reduce((result, key) => {
-                result[key] = isEqual(prevState[key], nextState[key]) ? prevState[key] : nextState[key];
+                result[key] = deepEqual(prevState[key], nextState[key]) ? prevState[key] : nextState[key];
                 return result;
             }, {});
         },
