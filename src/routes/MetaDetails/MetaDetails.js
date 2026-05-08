@@ -4,7 +4,7 @@ const React = require('react');
 const { useParams, useLocation, useNavigate } = require('react-router');
 const { useTranslation } = require('react-i18next');
 const classnames = require('classnames');
-const { useServices } = require('stremio/services');
+const { useCore } = require('stremio/core');
 const { useContentGamepadNavigation } = require('stremio/services/GamepadNavigation');
 const { withCoreSuspender } = require('stremio/common');
 const { useNavigateWithOrigin } = require('stremio/common/useNavigateWithOrigin');
@@ -23,7 +23,7 @@ const MetaDetails = () => {
     const { getStoredOrigin } = useNavigateWithOrigin();
     const contentRef = React.useRef(null);
     const { t } = useTranslation();
-    const { core } = useServices();
+    const core = useCore();
     const urlParams = React.useMemo(() => ({
         type,
         id,

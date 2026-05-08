@@ -6,7 +6,7 @@ const { useParams } = require('react-router');
 const { useSearchParams } = require('react-router-dom');
 const classnames = require('classnames');
 const { default: Icon } = require('@stremio/stremio-icons/react');
-const { useServices } = require('stremio/services');
+const { useCore } = require('stremio/core');
 const { CONSTANTS, useBinaryState, useOnScrollToBottom, withCoreSuspender } = require('stremio/common');
 const { AddonDetailsModal, Button, DelayedRenderer, Image, MainNavBars, MetaItem, MetaPreview, ModalDialog, MultiselectMenu } = require('stremio/components');
 const useDiscover = require('./useDiscover');
@@ -24,7 +24,7 @@ const Discover = () => {
     }), [type, transportUrl, catalogId]);
     const [queryParams] = useSearchParams();
     const { t } = useTranslation();
-    const { core } = useServices();
+    const core = useCore();
     const [discover, loadNextPage] = useDiscover(urlParams, queryParams);
     const [selectInputs, hasNextPage] = useSelectableInputs(discover);
     const [inputsModalOpen, openInputsModal, closeInputsModal] = useBinaryState(false);

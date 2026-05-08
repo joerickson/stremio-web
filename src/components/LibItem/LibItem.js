@@ -3,14 +3,14 @@
 const React = require('react');
 const { useNavigate } = require('react-router');
 const { default: toPath } = require('stremio/common/toPath');
-const { useServices } = require('stremio/services');
 const PropTypes = require('prop-types');
+const { useCore } = require('stremio/core');
 const MetaItem = require('stremio/components/MetaItem');
 const { t } = require('i18next');
 
 const LibItem = ({ _id, removable, notifications, watched, ...props }) => {
-    const { core } = useServices();
     const navigate = useNavigate();
+    const core = useCore();
 
     const newVideos = React.useMemo(() => {
         const count = notifications.items?.[_id]?.length ?? 0;

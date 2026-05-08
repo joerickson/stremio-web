@@ -5,8 +5,8 @@ const { useTranslation } = require('react-i18next');
 const { useSearchParams, useNavigate } = require('react-router-dom');
 const classnames = require('classnames');
 const { default: Icon } = require('@stremio/stremio-icons/react');
-const Modal = require('stremio/router/Modal');
-const { useServices } = require('stremio/services');
+const { Modal } = require('stremio-router');
+const { useCore } = require('stremio/core');
 const { useBinaryState } = require('stremio/common');
 const { default: useRouteFocused } = require('stremio/common/useRouteFocused');
 const { Button, Image, Checkbox } = require('stremio/components');
@@ -23,7 +23,7 @@ const LOGIN_FORM = 'login';
 const Intro = () => {
     const [queryParams, setQueryParams] = useSearchParams();
     const navigate = useNavigate();
-    const { core } = useServices();
+    const core = useCore();
     const { t } = useTranslation();
     const routeFocused = useRouteFocused();
     const [startFacebookLogin, stopFacebookLogin] = useFacebookLogin();
@@ -271,27 +271,24 @@ const Intro = () => {
         }
     }, [state.form, routeFocused]);
     React.useEffect(() => {
-        const onCoreEvent = ({ event, args }) => {
-            switch (event) {
-                case 'UserAuthenticated': {
-                    closeLoaderModal();
-                    if (routeFocused) {
-                        navigate('/');
-                    }
-                    break;
-                }
-                case 'Error': {
-                    if (args.source.event === 'UserAuthenticated') {
-                        closeLoaderModal();
-                    }
-
-                    break;
+        const onCoreEvent = (name) => {
+            if (name === 'UserAuthenticated') {
+                closeLoaderModal();
+                if (routeFocused) {
+                    navigate('/');
                 }
             }
         };
-        core.transport.on('CoreEvent', onCoreEvent);
+        const onCoreError = (source) => {
+            if (source.event === 'UserAuthenticated') {
+                closeLoaderModal();
+            }
+        };
+        core.on('event', onCoreEvent);
+        core.on('error', onCoreError);
         return () => {
-            core.transport.off('CoreEvent', onCoreEvent);
+            core.off('event', onCoreEvent);
+            core.off('error', onCoreError);
         };
     }, [routeFocused]);
     return (
