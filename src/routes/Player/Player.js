@@ -83,7 +83,13 @@ const Player = () => {
 
     const [immersed, setImmersed] = React.useState(true);
     const setImmersedDebounced = React.useCallback(debounce(setImmersed, 3000), []);
-    const [, , , toggleFullscreen] = useFullscreen();
+    const [fullscreen, , , toggleFullscreen, , setVideoElement] = useFullscreen();
+
+    React.useEffect(() => {
+        const el = video.containerRef.current?.querySelector('video');
+        setVideoElement(el || null);
+        return () => setVideoElement(null);
+    }, [video.state.manifest]);
 
     const [optionsMenuOpen, , closeOptionsMenu, toggleOptionsMenu] = useBinaryState(false);
     const [subtitlesMenuOpen, , closeSubtitlesMenu, toggleSubtitlesMenu] = useBinaryState(false);
@@ -550,7 +556,7 @@ const Player = () => {
         }
     }, [settings.pauseOnMinimize, shell.windowClosed, shell.windowHidden]);
 
-    useMediaSession(video.state, player, onPlayRequested, onPauseRequested, onNextVideoRequested);
+    useMediaSession(video.state, player, fullscreen, onPlayRequested, onPauseRequested, onNextVideoRequested);
 
     React.useEffect(() => {
         const onMediaKey = (action) => {
@@ -598,15 +604,10 @@ const Player = () => {
         video.state.muted === true ? onUnmuteRequested() : onMuteRequested();
     }, [video.state.muted], !menusOpen);
 
-    onShortcut('volumeUp', () => {
+    onShortcut('volume', (combo) => {
         if (video.state.volume !== null) {
-            onVolumeChangeRequested(Math.min(video.state.volume + 5, 200));
-        }
-    }, [video.state.volume], !menusOpen);
-
-    onShortcut('volumeDown', () => {
-        if (video.state.volume !== null) {
-            onVolumeChangeRequested(Math.max(video.state.volume - 5, 0));
+            const volume = combo === 0 ? Math.min(video.state.volume + 5, 200) : Math.max(video.state.volume - 5, 0);
+            onVolumeChangeRequested(volume);
         }
     }, [video.state.volume], !menusOpen);
 
@@ -631,15 +632,10 @@ const Player = () => {
         }
     }, [video.state.playbackSpeed, toggleSpeedMenu]);
 
-    onShortcut('speedUp', () => {
+    onShortcut('speed', (combo) => {
         if (video.state.playbackSpeed !== null) {
-            onPlaybackSpeedChanged(Math.min(video.state.playbackSpeed + 0.25, 2));
-        }
-    }, [video.state.playbackSpeed, onPlaybackSpeedChanged], !menusOpen);
-
-    onShortcut('speedDown', () => {
-        if (video.state.playbackSpeed !== null) {
-            onPlaybackSpeedChanged(Math.max(video.state.playbackSpeed - 0.25, 0.25));
+            const speed = combo === 0 ? Math.max(video.state.playbackSpeed - 0.25, 0.25) : Math.min(video.state.playbackSpeed + 0.25, 2);
+            onPlaybackSpeedChanged(speed);
         }
     }, [video.state.playbackSpeed, onPlaybackSpeedChanged], !menusOpen);
 
