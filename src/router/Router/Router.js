@@ -5,20 +5,35 @@ const { HashRouter } = require('react-router-dom');
 const { useNavigate } = require('react-router');
 const PropTypes = require('prop-types');
 const classnames = require('classnames');
-const { useServices } = require('stremio/services');
+const { useShortcuts } = require('stremio/common');
 const DeepLinkHandler = require('stremio/App/DeepLinkHandler');
 const { default: OpenMediaHandler } = require('stremio/App/OpenMediaHandler');
 const { default: Routes } = require('./Routes');
 
+const NAVIGATE_TABS_ROUTES = ['/', '/discover', '/library', '/calendar', '/addons', '/settings'];
+
 const KeyboardNavigationHandler = () => {
-    const { keyboardShortcuts } = useServices();
     const navigate = useNavigate();
+    const { on, off } = useShortcuts();
+
     React.useEffect(() => {
-        if (!keyboardShortcuts) return;
-        const onNavigate = (target) => navigate(target);
-        keyboardShortcuts.on('navigate', onNavigate);
-        return () => keyboardShortcuts.off('navigate', onNavigate);
-    }, [navigate, keyboardShortcuts]);
+        const onNavigateSearch = () => navigate('/search');
+        const onNavigateTabs = (_combo, key) => {
+            const index = Number(key) - 1;
+            if (index >= 0 && index < NAVIGATE_TABS_ROUTES.length) navigate(NAVIGATE_TABS_ROUTES[index]);
+        };
+        const onNavigateHistory = (combo) => navigate(combo === 0 ? -1 : 1);
+
+        on('navigateSearch', onNavigateSearch);
+        on('navigateTabs', onNavigateTabs);
+        on('navigateHistory', onNavigateHistory);
+        return () => {
+            off('navigateSearch', onNavigateSearch);
+            off('navigateTabs', onNavigateTabs);
+            off('navigateHistory', onNavigateHistory);
+        };
+    }, [navigate, on, off]);
+
     return null;
 };
 

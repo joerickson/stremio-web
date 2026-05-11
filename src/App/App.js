@@ -31,25 +31,13 @@ const App = () => {
     const [shortcutModalOpen,, closeShortcutsModal, toggleShortcutModal] = useBinaryState(false);
     const [gamepadModalOpen,, closeGamepadModal, toggleGamepadModal] = useBinaryState(false);
 
-    const onShortcut = React.useCallback((name, combo, key) => {
+    const onShortcut = React.useCallback((name) => {
         switch (name) {
             case 'shortcuts':
                 toggleShortcutModal();
                 break;
             case 'gamepadGuide':
                 toggleGamepadModal();
-                break;
-            case 'navigateSearch':
-                window.location = '#/search';
-                break;
-            case 'navigateTabs': {
-                const routes = ['', 'discover', 'library', 'calendar', 'addons', 'settings'];
-                const index = key - 1;
-                if (index in routes) window.location = `#/${routes[index]}`;
-                break;
-            }
-            case 'navigateHistory':
-                combo === 0 ? window.history.back() : window.history.forward();
                 break;
         }
     }, [toggleShortcutModal, toggleGamepadModal]);
