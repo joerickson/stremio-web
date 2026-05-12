@@ -5,6 +5,7 @@ const { PlatformProvider, usePlatform } = require('./Platform');
 const { ToastProvider, useToast } = require('./Toast');
 const { TooltipProvider, Tooltip } = require('./Tooltips');
 const { ShortcutsProvider, useShortcuts, onShortcut } = require('./Shortcuts');
+const { DiscordProvider, useDiscord } = require('./Discord');
 const CONSTANTS = require('./CONSTANTS');
 const { withCoreSuspender, useCoreSuspender } = require('./CoreSuspender');
 const getVisibleChildrenRange = require('./getVisibleChildrenRange');
@@ -16,7 +17,6 @@ const useAnimationFrame = require('./useAnimationFrame');
 const useBinaryState = require('./useBinaryState');
 const { default: useFullscreen } = require('./useFullscreen');
 const { default: useInterval } = require('./useInterval');
-const { default: useDiscord } = require('./useDiscord');
 const useLiveRef = require('./useLiveRef');
 const useModelState = require('./useModelState');
 const useNotifications = require('./useNotifications');
@@ -44,6 +44,8 @@ module.exports = {
     useToast,
     TooltipProvider,
     Tooltip,
+    DiscordProvider,
+    useDiscord,
     CONSTANTS,
     withCoreSuspender,
     useCoreSuspender,
@@ -56,7 +58,6 @@ module.exports = {
     useBinaryState,
     useFullscreen,
     useInterval,
-    useDiscord,
     useLiveRef,
     useModelState,
     useNotifications,

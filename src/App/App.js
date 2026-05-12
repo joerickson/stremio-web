@@ -6,7 +6,7 @@ const { useTranslation } = require('react-i18next');
 const { Router } = require('stremio-router');
 const { Core, Shell, Chromecast, Discord, DragAndDrop, KeyboardShortcuts, ServicesProvider } = require('stremio/services');
 const { NotFound } = require('stremio/routes');
-const { FileDropProvider, PlatformProvider, ToastProvider, TooltipProvider, ShortcutsProvider, CONSTANTS, withCoreSuspender, useShell, useBinaryState } = require('stremio/common');
+const { FileDropProvider, PlatformProvider, ToastProvider, TooltipProvider, ShortcutsProvider, DiscordProvider, CONSTANTS, withCoreSuspender, useShell, useBinaryState } = require('stremio/common');
 const ServicesToaster = require('./ServicesToaster');
 const DeepLinkHandler = require('./DeepLinkHandler');
 const SearchParamsHandler = require('./SearchParamsHandler');
@@ -217,18 +217,20 @@ const App = () => {
                                     <TooltipProvider className={styles['tooltip-container']}>
                                         <FileDropProvider className={styles['file-drop-container']}>
                                             <ShortcutsProvider onShortcut={onShortcut}>
-                                                {
-                                                    shortcutModalOpen && <ShortcutsModal onClose={closeShortcutsModal}/>
-                                                }
-                                                <ServicesToaster />
-                                                <DeepLinkHandler />
-                                                <SearchParamsHandler />
-                                                <UpdaterBanner className={styles['updater-banner-container']} />
-                                                <RouterWithProtectedRoutes
-                                                    className={styles['router']}
-                                                    viewsConfig={routerViewsConfig}
-                                                    onPathNotMatch={onPathNotMatch}
-                                                />
+                                                <DiscordProvider>
+                                                    {
+                                                        shortcutModalOpen && <ShortcutsModal onClose={closeShortcutsModal}/>
+                                                    }
+                                                    <ServicesToaster />
+                                                    <DeepLinkHandler />
+                                                    <SearchParamsHandler />
+                                                    <UpdaterBanner className={styles['updater-banner-container']} />
+                                                    <RouterWithProtectedRoutes
+                                                        className={styles['router']}
+                                                        viewsConfig={routerViewsConfig}
+                                                        onPathNotMatch={onPathNotMatch}
+                                                    />
+                                                </DiscordProvider>
                                             </ShortcutsProvider>
                                         </FileDropProvider>
                                     </TooltipProvider>

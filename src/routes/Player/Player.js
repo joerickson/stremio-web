@@ -609,20 +609,26 @@ const Player = ({ urlParams, queryParams }) => {
     }, [settings.pauseOnMinimize, shell.windowClosed, shell.windowHidden]);
 
     React.useEffect(() => {
-        if (!discord.connected || !discord.available) return;
+        if (video.state.stream === null || typeof player?.title !== 'string') {
+            discord.setActivity(null);
+            return;
+        }
 
-        const state = video.state.paused ? 'Paused' : 'Watching';
+        discord.setActivity({
+            state: video.state.paused ? 'Paused' : 'Watching',
+            details: player.title,
+            image: player.metaItem?.poster || null,
+            startTimestamp: !video.state.paused && typeof video.state.time === 'number' ?
+                Math.floor((Date.now() / 1000) - video.state.time) :
+                null,
+        });
+    }, [discord.setActivity, player?.title, player.metaItem?.poster, video.state.paused, video.state.stream]);
 
-        const startTimestamp = !video.state.paused && video.state.time !== null && video.state.duration !== null
-            ? Math.floor((Date.now() / 1000) - video.state.time)
-            : null;
-
-        discord.setActivity(state, player?.title, player?.metaItem?.poster, startTimestamp);
-
+    React.useEffect(() => {
         return () => {
-            discord.clearActivity();
+            discord.setActivity(null);
         };
-    }, [discord.connected, discord.available, player?.title, player?.metaItem, video.state]);
+    }, [discord.setActivity]);
 
     useMediaSession(video.state, player, onPlayRequested, onPauseRequested, onNextVideoRequested);
 

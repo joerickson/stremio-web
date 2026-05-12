@@ -17,7 +17,7 @@ const General = forwardRef<HTMLDivElement, Props>(({ profile }: Props, ref) => {
     const { core } = useServices();
     const platform = usePlatform();
     const toast = useToast();
-    const { available: discordAvailable, connected: isDiscordConnected, connect: connectDiscord, disconnect: disconnectDiscord } = useDiscord();
+    const discord = useDiscord();
     const [dataExport, loadDataExport] = useDataExport();
 
     const [traktAuthStarted, setTraktAuthStarted] = useState(false);
@@ -63,42 +63,23 @@ const General = forwardRef<HTMLDivElement, Props>(({ profile }: Props, ref) => {
     }, [isTraktAuthenticated, profile.auth]);
 
     const onToggleDiscord = useCallback(() => {
-        if (isDiscordConnected) {
-            disconnectDiscord();
-            core.transport.dispatch({
-                action: 'Ctx',
+        core.transport.dispatch({
+            action: 'Ctx',
+            args: {
+                action: 'UpdateSettings',
                 args: {
-                    action: 'UpdateSettings',
-                    args: {
-                        discordRpcEnabled: false
-                    }
+                    ...profile.settings,
+                    discordRpcEnabled: !profile.settings.discordRpcEnabled
                 }
-            });
-        } else {
-            connectDiscord();
-            core.transport.dispatch({
-                action: 'Ctx',
-                args: {
-                    action: 'UpdateSettings',
-                    args: {
-                        discordRpcEnabled: true
-                    }
-                }
-            });
-        }
-    }, [isDiscordConnected, connectDiscord, disconnectDiscord]);
+            }
+        });
+    }, [profile.settings]);
 
     useEffect(() => {
         if (dataExport.exportUrl) {
             platform.openExternal(dataExport.exportUrl);
         }
     }, [dataExport.exportUrl]);
-
-    useEffect(() => {
-        if (discordAvailable && profile.settings.discordRpcEnabled && !isDiscordConnected) {
-            connectDiscord();
-        }
-    }, [discordAvailable, profile.settings.discordRpcEnabled]);
 
     useEffect(() => {
         if (isTraktAuthenticated && traktAuthStarted) {
@@ -168,10 +149,10 @@ const General = forwardRef<HTMLDivElement, Props>(({ profile }: Props, ref) => {
                 </Button>
             </Option>
             {
-                discordAvailable &&
-                    <Option className={styles['discord-container']} icon={'discord'} label={t('SETTINGS_DISCORD')}>
-                        <Button className={'button'} title={isDiscordConnected ? t('DISCONNECT') : t('SETTINGS_DISCORD_CONNECT')} tabIndex={-1} onClick={onToggleDiscord}>
-                            {isDiscordConnected ? t('DISCONNECT') : t('SETTINGS_DISCORD_CONNECT')}
+                discord.available &&
+                    <Option className={styles['discord-container']} icon={'discord'} label={t('SETTINGS_DISCORD', { defaultValue: 'Discord Rich Presence' })}>
+                        <Button className={'button'} title={profile.settings.discordRpcEnabled ? t('MOBILE_DISCONNECT') : t('SETTINGS_DISCORD_CONNECT', { defaultValue: 'Connect' })} tabIndex={-1} onClick={onToggleDiscord}>
+                            {profile.settings.discordRpcEnabled ? t('MOBILE_DISCONNECT') : t('SETTINGS_DISCORD_CONNECT', { defaultValue: 'Connect' })}
                         </Button>
                     </Option>
             }
