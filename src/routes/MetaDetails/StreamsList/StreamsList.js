@@ -6,7 +6,7 @@ const classnames = require('classnames');
 const { useTranslation } = require('react-i18next');
 const { default: Icon } = require('@stremio/stremio-icons/react');
 const { Button, Image, MultiselectMenu } = require('stremio/components');
-const { useServices } = require('stremio/services');
+const { useCore } = require('stremio/core');
 const Stream = require('./Stream');
 const styles = require('./styles');
 const { usePlatform, useProfile } = require('stremio/common');
@@ -16,7 +16,7 @@ const ALL_ADDONS_KEY = 'ALL';
 
 const StreamsList = ({ className, video, type, onEpisodeSearch, ...props }) => {
     const { t } = useTranslation();
-    const { core } = useServices();
+    const core = useCore();
     const platform = usePlatform();
     const profile = useProfile();
     const streamsContainerRef = React.useRef(null);
@@ -104,7 +104,7 @@ const StreamsList = ({ className, video, type, onEpisodeSearch, ...props }) => {
                 {
                     video ?
                         <React.Fragment>
-                            <Button className={classnames(styles['button-container'], styles['back-button-container'])} tabIndex={-1} onClick={backButtonOnClick}>
+                            <Button className={classnames(styles['button-container'], styles['back-button-container'])} tabIndex={0} onClick={backButtonOnClick}>
                                 <Icon className={styles['icon']} name={'chevron-back'} />
                             </Button>
                             <div className={styles['episode-title']}>
