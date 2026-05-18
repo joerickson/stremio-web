@@ -57,6 +57,7 @@ const Player = ({ urlParams, queryParams }) => {
     const platform = usePlatform();
     const toast = useToast();
     const discord = useDiscord();
+    const discordStartTimestamp = React.useRef(null);
 
     const [seeking, setSeeking] = React.useState(false);
 
@@ -545,19 +546,30 @@ const Player = ({ urlParams, queryParams }) => {
 
     React.useEffect(() => {
         if (video.state.stream === null || typeof player?.title !== 'string') {
+            discordStartTimestamp.current = null;
             discord.setActivity(null);
             return;
+        }
+
+        if (video.state.paused) {
+            discordStartTimestamp.current = null;
+        } else if (typeof video.state.time === 'number') {
+            const startTimestamp = Math.floor((Date.now() / 1000) - video.state.time);
+            if (
+                discordStartTimestamp.current === null ||
+                Math.abs(discordStartTimestamp.current - startTimestamp) > 5
+            ) {
+                discordStartTimestamp.current = startTimestamp;
+            }
         }
 
         discord.setActivity({
             state: video.state.paused ? 'Paused' : 'Watching',
             details: player.title,
             image: player.metaItem?.poster || null,
-            startTimestamp: !video.state.paused && typeof video.state.time === 'number' ?
-                Math.floor((Date.now() / 1000) - video.state.time) :
-                null,
+            startTimestamp: video.state.paused ? null : discordStartTimestamp.current,
         });
-    }, [discord.setActivity, player?.title, player.metaItem?.poster, video.state.paused, video.state.stream]);
+    }, [discord.setActivity, player?.title, player.metaItem?.poster, video.state.paused, video.state.stream, video.state.time]);
 
     React.useEffect(() => {
         return () => {

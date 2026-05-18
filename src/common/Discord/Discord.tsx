@@ -33,7 +33,7 @@ const DiscordProvider = ({ children }: Props) => {
     const { discord } = useServices();
     const profile = useProfile();
     const enabled = profile.settings?.discordRpcEnabled === true;
-    const available = discord?.available === true;
+    const [available, setAvailable] = useState(discord?.available === true);
     const [connected, setConnected] = useState(false);
     const [activity, setActivityState] = useState<Activity | null>(null);
     const sentActivity = useRef<Activity | null>(null);
@@ -46,10 +46,17 @@ const DiscordProvider = ({ children }: Props) => {
             connectRequested.current = false;
             setConnected(isConnected);
         };
+        const onAvailabilityChanged = (isAvailable: boolean) => {
+            setAvailable(isAvailable);
+        };
 
         discord.on('statusChanged', onStatusChanged);
+        discord.on('availabilityChanged', onAvailabilityChanged);
+        setAvailable(discord.available === true);
+
         return () => {
             discord.off('statusChanged', onStatusChanged);
+            discord.off('availabilityChanged', onAvailabilityChanged);
         };
     }, [discord]);
 

@@ -8,22 +8,25 @@ type DiscordStatusData = {
 
 class Discord {
     private events: EventEmitter;
-    private connected: boolean;
     private shell: any;
 
     constructor() {
         this.events = new EventEmitter();
-        this.connected = false;
         this.shell = null;
     }
 
     init(shellService: any): void {
         this.shell = shellService;
 
+        if (this.shell) {
+            this.shell.on('stateChanged', () => {
+                this.events.emit('availabilityChanged', this.available);
+            });
+        }
+
         if (this.shell && this.shell.transport) {
             this.shell.transport.on('discord-status', (data: DiscordStatusData) => {
-                this.connected = data.connected;
-                this.events.emit('statusChanged', this.connected);
+                this.events.emit('statusChanged', data.connected);
             });
         }
     }
@@ -41,7 +44,7 @@ class Discord {
     }
 
     setActivity(state: string, details: string, image?: string | null, startTimestamp?: number | null): void {
-        if (this.shell && this.shell.active && this.connected) {
+        if (this.shell && this.shell.active) {
             this.shell.transport.send('discord-set-activity', {
                 state,
                 details,
@@ -52,7 +55,7 @@ class Discord {
     }
 
     clearActivity(): void {
-        if (this.shell && this.shell.active && this.connected) {
+        if (this.shell && this.shell.active) {
             this.shell.transport.send('discord-clear-activity', {});
         }
     }
