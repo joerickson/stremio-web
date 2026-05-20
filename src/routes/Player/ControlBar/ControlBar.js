@@ -40,7 +40,6 @@ const ControlBar = React.forwardRef(({
     onToggleSideDrawer,
     onToggleOptionsMenu,
     shellCastSupported,
-    onRefreshCastDevices,
     onToggleCastDevicesMenu,
     videoScale,
     videoScaleLabel,
@@ -104,9 +103,6 @@ const ControlBar = React.forwardRef(({
     const castButtonDisabled = platform.shell.active ? !shellCastSupported : !chromecastServiceActive;
     const onChromecastButtonClick = React.useCallback(() => {
         if (platform.shell.active) {
-            if (typeof onRefreshCastDevices === 'function') {
-                onRefreshCastDevices();
-            }
             if (shellCastSupported && typeof onToggleCastDevicesMenu === 'function') {
                 onToggleCastDevicesMenu();
             }
@@ -116,7 +112,7 @@ const ControlBar = React.forwardRef(({
             return;
         }
         chromecast.transport.requestSession();
-    }, [castButtonDisabled, platform.shell.active, shellCastSupported, onRefreshCastDevices, onToggleCastDevicesMenu]);
+    }, [castButtonDisabled, platform.shell.active, shellCastSupported, onToggleCastDevicesMenu]);
     React.useEffect(() => {
         const onStateChanged = () => {
             setChromecastServiceActive(chromecast.active);
@@ -241,7 +237,6 @@ ControlBar.propTypes = {
     onToggleSideDrawer: PropTypes.func,
     onToggleOptionsMenu: PropTypes.func,
     shellCastSupported: PropTypes.bool,
-    onRefreshCastDevices: PropTypes.func,
     onToggleCastDevicesMenu: PropTypes.func,
     onToggleStatisticsMenu: PropTypes.func,
     onMouseOver: PropTypes.func,
