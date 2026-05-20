@@ -19,6 +19,7 @@ const ControlBar = require('./ControlBar');
 const NextVideoPopup = require('./NextVideoPopup');
 const StatisticsMenu = require('./StatisticsMenu');
 const OptionsMenu = require('./OptionsMenu');
+const { default: CastDevicesMenu } = require('./CastDevicesMenu');
 const SubtitlesMenu = require('./SubtitlesMenu');
 const { default: AudioMenu } = require('./AudioMenu');
 const SpeedMenu = require('./SpeedMenu');
@@ -82,12 +83,13 @@ const Player = ({ urlParams, queryParams }) => {
     const [audioMenuOpen, , closeAudioMenu, toggleAudioMenu] = useBinaryState(false);
     const [speedMenuOpen, , closeSpeedMenu, toggleSpeedMenu] = useBinaryState(false);
     const [statisticsMenuOpen, , closeStatisticsMenu, toggleStatisticsMenu] = useBinaryState(false);
+    const [castDevicesMenuOpen, , closeCastDevicesMenu, toggleCastDevicesMenu] = useBinaryState(false);
     const [nextVideoPopupOpen, openNextVideoPopup, closeNextVideoPopup] = useBinaryState(false);
     const [sideDrawerOpen, , closeSideDrawer, toggleSideDrawer] = useBinaryState(false);
 
     const menusOpen = React.useMemo(() => {
-        return optionsMenuOpen || subtitlesMenuOpen || audioMenuOpen || speedMenuOpen || statisticsMenuOpen || sideDrawerOpen || nextVideoPopupOpen;
-    }, [optionsMenuOpen, subtitlesMenuOpen, audioMenuOpen, speedMenuOpen, statisticsMenuOpen, sideDrawerOpen, nextVideoPopupOpen]);
+        return optionsMenuOpen || subtitlesMenuOpen || audioMenuOpen || speedMenuOpen || statisticsMenuOpen || castDevicesMenuOpen || sideDrawerOpen || nextVideoPopupOpen;
+    }, [optionsMenuOpen, subtitlesMenuOpen, audioMenuOpen, speedMenuOpen, statisticsMenuOpen, castDevicesMenuOpen, sideDrawerOpen, nextVideoPopupOpen]);
 
     const closeMenus = React.useCallback(() => {
         closeOptionsMenu();
@@ -95,8 +97,32 @@ const Player = ({ urlParams, queryParams }) => {
         closeAudioMenu();
         closeSpeedMenu();
         closeStatisticsMenu();
+        closeCastDevicesMenu();
         closeSideDrawer();
     }, []);
+
+    const castDevices = React.useMemo(() => {
+        return playbackDevices.filter(({ type }) => type === 'chromecast' || type === 'tv');
+    }, [playbackDevices]);
+    const castStreamingUrl = React.useMemo(() => {
+        return player.selected?.stream?.deepLinks?.externalPlayer?.streaming || null;
+    }, [player.selected]);
+    const shellCastAvailable = platform.shell.active && castStreamingUrl !== null && castDevices.length > 0;
+    const onCastDeviceSelected = React.useCallback((deviceId) => {
+        if (castStreamingUrl) {
+            core.transport.dispatch({
+                action: 'StreamingServer',
+                args: {
+                    action: 'PlayOnDevice',
+                    args: {
+                        device: deviceId,
+                        source: castStreamingUrl,
+                    }
+                }
+            });
+            closeCastDevicesMenu();
+        }
+    }, [castStreamingUrl]);
 
     const {
         streamSubtitles,
@@ -293,6 +319,9 @@ const Player = ({ urlParams, queryParams }) => {
         }
         if (!event.nativeEvent.statisticsMenuClosePrevented) {
             closeStatisticsMenu();
+        }
+        if (!event.nativeEvent.castDevicesMenuClosePrevented) {
+            closeCastDevicesMenu();
         }
 
         closeSideDrawer();
@@ -878,6 +907,8 @@ const Player = ({ urlParams, queryParams }) => {
                 onVolumeChangeRequested={onVolumeChangeRequested}
                 onSeekRequested={onSeekRequested}
                 onToggleOptionsMenu={toggleOptionsMenu}
+                shellCastAvailable={shellCastAvailable}
+                onToggleCastDevicesMenu={toggleCastDevicesMenu}
                 onToggleSubtitlesMenu={toggleSubtitlesMenu}
                 onToggleAudioMenu={toggleAudioMenu}
                 onToggleSpeedMenu={toggleSpeedMenu}
@@ -911,6 +942,13 @@ const Player = ({ urlParams, queryParams }) => {
                 <StatisticsMenu
                     className={classnames(styles['layer'], styles['menu-layer'])}
                     {...statistics}
+                />
+            </Transition>
+            <Transition when={castDevicesMenuOpen} name={'fade'}>
+                <CastDevicesMenu
+                    className={classnames(styles['layer'], styles['menu-layer'])}
+                    devices={castDevices}
+                    onDeviceSelected={onCastDeviceSelected}
                 />
             </Transition>
             <Transition when={sideDrawerOpen} name={'slide-left'}>
