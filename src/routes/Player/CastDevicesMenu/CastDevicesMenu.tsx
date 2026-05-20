@@ -14,10 +14,11 @@ type CastDevice = {
 type Props = {
     className: string,
     devices: CastDevice[],
+    loading: boolean,
     onDeviceSelected: (deviceId: string) => void,
 };
 
-const CastDevicesMenu = memo(forwardRef<HTMLDivElement, Props>(({ className, devices, onDeviceSelected }, ref) => {
+const CastDevicesMenu = memo(forwardRef<HTMLDivElement, Props>(({ className, devices, loading, onDeviceSelected }, ref) => {
     const { t } = useTranslation();
 
     const onMouseDown = (event: MouseEvent) => {
@@ -28,15 +29,25 @@ const CastDevicesMenu = memo(forwardRef<HTMLDivElement, Props>(({ className, dev
     return (
         <div ref={ref} className={classNames(className, styles['cast-devices-menu-container'])} onMouseDown={onMouseDown}>
             {
-                devices.map(({ id, name }) => (
-                    <Option
-                        key={id}
-                        icon={'cast'}
-                        label={t('PLAYER_PLAY_IN', { device: name })}
-                        deviceId={id}
-                        onClick={onDeviceSelected}
-                    />
-                ))
+                devices.length > 0 ?
+                    devices.map(({ id, name }) => (
+                        <Option
+                            key={id}
+                            icon={'cast'}
+                            label={t('PLAYER_PLAY_IN', { device: name })}
+                            deviceId={id}
+                            onClick={onDeviceSelected}
+                        />
+                    ))
+                    :
+                    <div className={styles['message']}>
+                        {
+                            loading ?
+                                t('STREAM_LOADING')
+                                :
+                                t('PLAYER_NO_CAST_DEVICES_FOUND', { defaultValue: 'No cast devices found' })
+                        }
+                    </div>
             }
         </div>
     );

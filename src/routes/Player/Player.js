@@ -104,10 +104,21 @@ const Player = ({ urlParams, queryParams }) => {
     const castDevices = React.useMemo(() => {
         return playbackDevices.filter(({ type }) => type === 'chromecast' || type === 'tv');
     }, [playbackDevices]);
+    const castDevicesLoading = platform.shell.active && streamingServer.playbackDevices !== null && streamingServer.playbackDevices.type === 'Loading';
     const castStreamingUrl = React.useMemo(() => {
         return player.selected?.stream?.deepLinks?.externalPlayer?.streaming || null;
     }, [player.selected]);
-    const shellCastAvailable = platform.shell.active && castStreamingUrl !== null && castDevices.length > 0;
+    const shellCastSupported = platform.shell.active && castStreamingUrl !== null;
+    const refreshCastDevices = React.useCallback(() => {
+        if (platform.shell.active) {
+            core.transport.dispatch({
+                action: 'StreamingServer',
+                args: {
+                    action: 'RefreshPlaybackDevices',
+                }
+            });
+        }
+    }, [platform.shell.active]);
     const onCastDeviceSelected = React.useCallback((deviceId) => {
         if (castStreamingUrl) {
             core.transport.dispatch({
@@ -123,6 +134,11 @@ const Player = ({ urlParams, queryParams }) => {
             closeCastDevicesMenu();
         }
     }, [castStreamingUrl]);
+    React.useEffect(() => {
+        if (castDevicesMenuOpen) {
+            refreshCastDevices();
+        }
+    }, [castDevicesMenuOpen, refreshCastDevices]);
 
     const {
         streamSubtitles,
@@ -907,7 +923,8 @@ const Player = ({ urlParams, queryParams }) => {
                 onVolumeChangeRequested={onVolumeChangeRequested}
                 onSeekRequested={onSeekRequested}
                 onToggleOptionsMenu={toggleOptionsMenu}
-                shellCastAvailable={shellCastAvailable}
+                shellCastSupported={shellCastSupported}
+                onRefreshCastDevices={refreshCastDevices}
                 onToggleCastDevicesMenu={toggleCastDevicesMenu}
                 onToggleSubtitlesMenu={toggleSubtitlesMenu}
                 onToggleAudioMenu={toggleAudioMenu}
@@ -948,6 +965,7 @@ const Player = ({ urlParams, queryParams }) => {
                 <CastDevicesMenu
                     className={classnames(styles['layer'], styles['menu-layer'])}
                     devices={castDevices}
+                    loading={castDevicesLoading}
                     onDeviceSelected={onCastDeviceSelected}
                 />
             </Transition>

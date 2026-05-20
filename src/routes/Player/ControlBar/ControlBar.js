@@ -39,7 +39,8 @@ const ControlBar = React.forwardRef(({
     onToggleSpeedMenu,
     onToggleSideDrawer,
     onToggleOptionsMenu,
-    shellCastAvailable,
+    shellCastSupported,
+    onRefreshCastDevices,
     onToggleCastDevicesMenu,
     videoScale,
     videoScaleLabel,
@@ -100,19 +101,22 @@ const ControlBar = React.forwardRef(({
             }
         }
     }, [muted, onMuteRequested, onUnmuteRequested]);
-    const castButtonDisabled = platform.shell.active ? !shellCastAvailable : !chromecastServiceActive;
+    const castButtonDisabled = platform.shell.active ? !shellCastSupported : !chromecastServiceActive;
     const onChromecastButtonClick = React.useCallback(() => {
+        if (platform.shell.active) {
+            if (typeof onRefreshCastDevices === 'function') {
+                onRefreshCastDevices();
+            }
+            if (shellCastSupported && typeof onToggleCastDevicesMenu === 'function') {
+                onToggleCastDevicesMenu();
+            }
+            return;
+        }
         if (castButtonDisabled) {
             return;
         }
-        if (platform.shell.active) {
-            if (typeof onToggleCastDevicesMenu === 'function') {
-                onToggleCastDevicesMenu();
-            }
-        } else {
-            chromecast.transport.requestSession();
-        }
-    }, [castButtonDisabled, platform.shell.active, onToggleCastDevicesMenu]);
+        chromecast.transport.requestSession();
+    }, [castButtonDisabled, platform.shell.active, shellCastSupported, onRefreshCastDevices, onToggleCastDevicesMenu]);
     React.useEffect(() => {
         const onStateChanged = () => {
             setChromecastServiceActive(chromecast.active);
@@ -236,7 +240,8 @@ ControlBar.propTypes = {
     onToggleSpeedMenu: PropTypes.func,
     onToggleSideDrawer: PropTypes.func,
     onToggleOptionsMenu: PropTypes.func,
-    shellCastAvailable: PropTypes.bool,
+    shellCastSupported: PropTypes.bool,
+    onRefreshCastDevices: PropTypes.func,
     onToggleCastDevicesMenu: PropTypes.func,
     onToggleStatisticsMenu: PropTypes.func,
     onMouseOver: PropTypes.func,
