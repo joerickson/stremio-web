@@ -15,6 +15,7 @@ const { default: UpdaterBanner } = require('./UpdaterBanner');
 const { default: ShortcutsModal } = require('./ShortcutsModal');
 const { default: GamepadModal } = require('./GamepadModal');
 const TorrentioPromptModal = require('./TorrentioPromptModal');
+const BrowserBanner = require('./BrowserBanner');
 const withProtectedRoutes = require('./withProtectedRoutes');
 const routerViewsConfig = require('./routerViewsConfig');
 const styles = require('./styles');
@@ -210,6 +211,7 @@ const App = () => {
                                 {
                                     torrentioPromptOpen && <TorrentioPromptModal onClose={closeTorrentioPrompt}/>
                                 }
+                                <BrowserBanner />
                                 <ServicesToaster />
                                 <DeepLinkHandler />
                                 <SearchParamsHandler />
