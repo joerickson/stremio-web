@@ -14,6 +14,7 @@ const SearchParamsHandler = require('./SearchParamsHandler');
 const { default: UpdaterBanner } = require('./UpdaterBanner');
 const { default: ShortcutsModal } = require('./ShortcutsModal');
 const { default: GamepadModal } = require('./GamepadModal');
+const TorrentioPromptModal = require('./TorrentioPromptModal');
 const withProtectedRoutes = require('./withProtectedRoutes');
 const routerViewsConfig = require('./routerViewsConfig');
 const styles = require('./styles');
@@ -36,6 +37,17 @@ const App = () => {
     }, []);
     const [shortcutModalOpen,, closeShortcutsModal, toggleShortcutModal] = useBinaryState(false);
     const [gamepadModalOpen,, closeGamepadModal, toggleGamepadModal] = useBinaryState(false);
+    const [torrentioPromptOpen, setTorrentioPromptOpen] = React.useState(false);
+    const closeTorrentioPrompt = React.useCallback(() => setTorrentioPromptOpen(false), []);
+
+    React.useEffect(() => {
+        try {
+            if (!window.localStorage.getItem(TorrentioPromptModal.FLAG_KEY)) {
+                const t = window.setTimeout(() => setTorrentioPromptOpen(true), 1500);
+                return () => window.clearTimeout(t);
+            }
+        } catch (_) { /* localStorage unavailable */ }
+    }, []);
 
     const onShortcut = React.useCallback((name, combo, key) => {
         switch (name) {
@@ -194,6 +206,9 @@ const App = () => {
                                 }
                                 {
                                     gamepadModalOpen && <GamepadModal onClose={closeGamepadModal}/>
+                                }
+                                {
+                                    torrentioPromptOpen && <TorrentioPromptModal onClose={closeTorrentioPrompt}/>
                                 }
                                 <ServicesToaster />
                                 <DeepLinkHandler />
