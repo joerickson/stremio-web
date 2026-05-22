@@ -1,6 +1,7 @@
-# Stremio Node 20.x
+# Stremio Node 22.x
 # the node version for running Stremio Web
-ARG NODE_VERSION=20-alpine
+# Bumped from 20 to 22 because corepack pulls the latest pnpm (11.x) which requires Node >=22.13
+ARG NODE_VERSION=22-alpine
 FROM node:$NODE_VERSION AS base
 
 # Setup pnpm
