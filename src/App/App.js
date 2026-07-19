@@ -11,6 +11,7 @@ const { FullscreenProvider, ToastProvider, TooltipProvider, ShortcutsProvider, C
 const ServicesToaster = require('./ServicesToaster');
 const DeepLinkHandler = require('./DeepLinkHandler');
 const SearchParamsHandler = require('./SearchParamsHandler');
+const StreamingServerMigration = require('./StreamingServerMigration');
 const { default: UpdaterBanner } = require('./UpdaterBanner');
 const { default: ShortcutsModal } = require('./ShortcutsModal');
 const { default: GamepadModal } = require('./GamepadModal');
@@ -215,6 +216,7 @@ const App = () => {
                                 <ServicesToaster />
                                 <DeepLinkHandler />
                                 <SearchParamsHandler />
+                                <StreamingServerMigration />
                                 <UpdaterBanner className={styles['updater-banner-container']} />
                                 <RouterWithProtectedRoutes
                                     className={styles['router']}
