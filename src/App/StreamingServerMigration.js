@@ -4,16 +4,20 @@ const React = require('react');
 const { useCore } = require('stremio/core');
 const { withCoreSuspender, useProfile, CONSTANTS } = require('stremio/common');
 
-// Bumped if we ever need to re-run the migration for all users.
-const MIGRATION_FLAG = 'streamxi_streaming_server_migrated_v1';
+// A localhost/127.0.0.1 streaming-server URL (any port/format). This is the
+// stock default and also what a fresh account tends to have synced.
+const LOCAL_DEFAULT_RE = /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?\/?$/i;
 
-// One-time adoption of the central streaming server.
+// Keep every device on the central streaming server.
 //
-// stremio-core seeds fresh profiles with LEGACY_STREAMING_SERVER_URL
-// (http://127.0.0.1:11470/), which only works if the user runs a local server.
-// On first load we switch any profile still on that untouched default over to
-// the central server (DEFAULT_STREAMING_SERVER_URL), then record a flag so we
-// never override a URL the user deliberately chose later.
+// stremio-core seeds fresh profiles with a localhost URL that only works if the
+// user runs a local server. We switch that over to DEFAULT_STREAMING_SERVER_URL
+// (the central server). We do NOT gate this behind a run-once flag: the streaming
+// server URL syncs with the Stremio account, so logging in overwrites our value
+// back to the account's localhost default -- we must re-apply after that, not just
+// on first load. Re-applying also pushes the central URL up to the account (via
+// UpdateSettings while logged in), so all devices converge on it. Once the active
+// URL is the central one, the condition is false and this becomes a no-op.
 const StreamingServerMigration = () => {
     const core = useCore();
     const profile = useProfile();
@@ -26,17 +30,8 @@ const StreamingServerMigration = () => {
             return;
         }
 
-        try {
-            if (window.localStorage.getItem(MIGRATION_FLAG)) {
-                return;
-            }
-        } catch (e) {
-            // localStorage unavailable (private mode) — skip, don't loop.
-            return;
-        }
-
         const target = CONSTANTS.DEFAULT_STREAMING_SERVER_URL;
-        if (current === CONSTANTS.LEGACY_STREAMING_SERVER_URL && target !== current) {
+        if (LOCAL_DEFAULT_RE.test(current) && current !== target) {
             core.transport.dispatch({
                 action: 'Ctx',
                 args: {
@@ -54,12 +49,6 @@ const StreamingServerMigration = () => {
                     args: target,
                 },
             });
-        }
-
-        try {
-            window.localStorage.setItem(MIGRATION_FLAG, '1');
-        } catch (e) {
-            // ignore
         }
     }, [profile]);
 
